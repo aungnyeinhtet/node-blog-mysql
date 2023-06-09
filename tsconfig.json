@@ -7,7 +7,6 @@
     "moduleResolution": "Node",
     "outDir": "dist",
     "baseUrl": "./",
-    "rootDir": "src",
     "allowJs": true,
     "sourceMap": true,
     "strict": true,
@@ -19,7 +18,7 @@
     "forceConsistentCasingInFileNames": true
   },
   "include": [
-    "src/**/*.ts"
+    "**/*.ts"
   ],
   "exclude": [
     "node_modules"

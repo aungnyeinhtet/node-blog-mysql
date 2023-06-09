@@ -6,12 +6,13 @@ import { PORT } from "./config/constants";
 import routes from "./routes";
 import cors from "cors";
 import * as dotenv from "dotenv";
+import { handleError } from "./middlewares/errors.middleware";
 dotenv.config();
 
 export const createApp = (): Express => {
   const app = express();
 
-  app.set(PORT, process.env.DB_PORT || 8000);
+  app.set(PORT, process.env.PORT || 8000);
   app.use(express.urlencoded({ extended: true }));
   app.use(express.json());
   app.use(cors());
@@ -19,6 +20,6 @@ export const createApp = (): Express => {
   app.use(helmet());
   app.use(compression());
   app.use("/api", routes);
-
+  app.use(handleError);
   return app;
 };

@@ -1,47 +1,32 @@
-import { createPool, Pool } from "mysql";
-
-let pool: Pool;
-
-export const connect = () => {
-  try {
-    pool = createPool({
-      connectionLimit: parseInt(process.env.DB_CONNECTION_LIMIT),
-      host: process.env.DB_HOST,
-      user: process.env.DB_USER,
-      password: process.env.DB_PASSWORD,
-      database: process.env.DB_DATABASE,
-    });
-    console.debug("Mysql Adapter generated successfully!");
-  } catch (error) {
-    console.error("[mysql.connector][init][Error]: ", error);
-    throw new Error("failed to initialized pool");
+import { Pool } from "pg";
+import {
+  databaseHost,
+  databaseName,
+  databasePassword,
+  databaseUsername,
+} from "./constants";
+const pool = new Pool({
+  host: databaseHost,
+  user: databaseUsername,
+  database: databaseName,
+  password: databasePassword,
+  max: 20,
+  idleTimeoutMillis: 30000,
+  connectionTimeoutMillis: 10000,
+});
+pool.connect((err, client, release) => {
+  console.log("Database Server Address is ...", databaseHost);
+  if (err) {
+    console.error("Error acquiring client", err.stack);
+    process.exit(-1);
   }
-};
-/**
- * executes SQL queries in MySQL db
- *
- * @param {string} query - provide a valid SQL query
- * @param {string[] | Object} params - provide the parameterized values used
- * in the query
- */
-export const execute = <T>(
-  query: string,
-  params: string[] | Object
-): Promise<T> => {
-  try {
-    if (!pool)
-      throw new Error(
-        "Pool was not created. Ensure pool is created when running the app."
-      );
+  console.log("Database Connected Successfully!");
+  release();
+});
 
-    return new Promise<T>((resolve, reject) => {
-      pool.query(query, params, (error, results) => {
-        if (error) reject(error);
-        else resolve(results);
-      });
-    });
-  } catch (error) {
-    console.error("[mysql.connector][execute][Error]: ", error);
-    throw new Error("failed to execute MySQL query");
-  }
-};
+pool.on("error", (err, client) => {
+  console.error("Unexpected error on idle client", err);
+  process.exit(-1);
+});
+
+export default pool;
